@@ -1,0 +1,60 @@
+﻿<Window x:Class="NeuralNet.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NeuralNet"
+        xmlns:vm="clr-namespace:NeuralNet.ViewModel"
+        mc:Ignorable="d"
+        Title="Chris Lomont's Neural Net Octagon vPI" Height="450" Width="800"
+        Loaded="OnLoaded"
+        >
+    <Window.DataContext>
+        <vm:ViewModel/>
+    </Window.DataContext>
+
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Right" Width="300">
+            <StackPanel DockPanel.Dock="Top">
+                <Button Command="{Binding ShowDataCommand}">Show data</Button>
+            </StackPanel>
+            <Grid>
+            <ListBox ItemsSource="{Binding Results}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Background="{Binding Background}">
+                            <Image Source="{Binding bmp}"></Image>
+                            <TextBlock Text="{Binding Text}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            </Grid>
+        </DockPanel>
+        <DockPanel >
+        <StackPanel DockPanel.Dock="Top">
+                <UniformGrid DockPanel.Dock="Top" >
+                    <Label>Epochs:</Label>
+                    <TextBox Text="{Binding Epochs}" Width="30"/>
+
+                    <Label>LearningRate:</Label>
+                    <TextBox Text="{Binding LearningRate}" Width="30"/>
+
+                    <Label>HiddenLayerSize:</Label>
+                    <TextBox Text="{Binding HiddenLayerSize}" Width="30"/>
+
+                    <Label>MiniBatchSize:</Label>
+                    <TextBox Text="{Binding MiniBatchSize}" Width="30"/>
+
+                    <Label>RandSeed:</Label>
+                    <TextBox Text="{Binding RandSeed}" Width="30"/>
+
+                    <Button Command="{Binding StartCommand}">Start</Button>
+
+                </UniformGrid>
+            </StackPanel>
+        <ListBox ItemsSource="{Binding Messages}"></ListBox>
+        </DockPanel>
+
+    </DockPanel>
+</Window>
