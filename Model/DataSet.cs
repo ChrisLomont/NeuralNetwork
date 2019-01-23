@@ -109,5 +109,29 @@ namespace NeuralNet.Model
             );
             return ds;
         }
+
+        // make simple dataset: N training points of input length Len, output length 4, maps input one hot to output one hot
+        // same points for test set
+        public static DataSet LoadSimple(int trainingSize, int testSize, int vecLength)
+        {
+            Random rand = new Random(1234);
+            var ds = new DataSet();
+            for (var i = 0; i < trainingSize; ++i)
+            {
+                var pt = new Vector(vecLength);
+                var index = rand.Next(vecLength);
+                pt[index] = 1.0f;
+                ds.TrainingSet.Add(new DataPoint(pt,pt));
+            }
+            for (var i = 0; i < testSize; ++i)
+            {
+                var pt = new Vector(vecLength);
+                var index = rand.Next(vecLength);
+                pt[index] = 1.0f;
+                ds.TestSet.Add(new DataPoint(pt, pt));
+            }
+            return ds;
+        }
+
     }
 }

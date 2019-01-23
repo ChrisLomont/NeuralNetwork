@@ -149,9 +149,7 @@ namespace NeuralNet.Model
         // return true if computed passed compared to desired
         bool Passed(Vector computed, Vector desired)
         {
-            var computedIndex = MaxIndex(computed);
-            var desiredIndex = MaxIndex(desired);
-            return computedIndex == desiredIndex;
+            return MaxIndex(computed) == MaxIndex(desired);
         }
 
         // process data, return number correct
@@ -164,18 +162,12 @@ namespace NeuralNet.Model
                 neuralNet.ZeroDeltas();
             for (var i = 0; i < batchSize; ++i)
             {
-                var point = dataSet.TrainingSet[shuffled[i]];
-                var output = neuralNet.FeedForward(point.input);
-                //var (nameT, boundsT) = neuralNet.Bounds(); // watch errors - todo
-                var errorVector = output - point.output;
-
-                totalPassed += Passed(output, point.output) ? 1 : 0;
-
+                var dataPoint = dataSet.TrainingSet[shuffled[i]];
+                var computed = neuralNet.FeedForward(dataPoint.input);
+                var errorVector = computed - dataPoint.output;
+                totalPassed += Passed(computed, dataPoint.output) ? 1 : 0;
                 if (training)
                     neuralNet.BackpropagateToDeltas(errorVector);
-                //(nameT, boundsT) = neuralNet.Bounds(); // watch errors - todo
-                //neuralNet.Check();
-                //Console.WriteLine($"Train {i+1}/{trainingSize} -> {nameT} {boundsT}");
             }
             if (training)
                 neuralNet.ModifyWeights(learningRate, batchSize);
