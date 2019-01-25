@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -31,10 +32,13 @@ namespace NeuralNet.ViewModel
         {
             StartStopCommand = new RelayCommand(StartStop);
             ShowDataCommand = new RelayCommand(ShowData);
+            ClearGuessCommand = new RelayCommand(ClearGuess);
             SelectedExperiment = Experiments[1];
+            ClearGuess();
         }
         public RelayCommand StartStopCommand { get;  }
         public RelayCommand ShowDataCommand { get; }
+        public RelayCommand ClearGuessCommand { get; }
 
         private Experiment selectedExperiment = null;
         public Experiment SelectedExperiment
@@ -45,6 +49,111 @@ namespace NeuralNet.ViewModel
                 Set<Experiment>(() => this.SelectedExperiment, ref selectedExperiment, value);
             }
         }
+
+        private string guessedText = "?";
+        public string GuessedText
+        {
+            get => guessedText;
+            set
+            {
+                Set<string>(() => this.GuessedText, ref guessedText, value);
+            }
+        }
+
+        private WriteableBitmap guessedImage = null;
+        public WriteableBitmap GuessedImage
+        {
+            get => guessedImage;
+            set
+            {
+                Set<WriteableBitmap>(() => this.GuessedImage, ref guessedImage, value);
+            }
+        }
+
+        
+        void ClearGuess()
+        {
+            var pixels = new byte[28*28*3];
+            for (var i = 0; i < 28 * 28 * 3; ++i)
+                pixels[i] = 255;
+            var img = new WriteableBitmap(28,28,96.0,96.0,PixelFormats.Rgb24,null);
+            img.WritePixels(new Int32Rect(0,0,28,28),pixels,28*3, 0);
+            GuessedImage = img;
+        }
+
+        void Draw(Point last, Point point)
+        {
+            if (guessedImage == null)
+                ClearGuess();
+            var w = guessedImage.PixelWidth;
+            var h = guessedImage.PixelHeight;
+            byte [] pixels = new byte[w*h*3];
+            var stride = w * 3;
+            guessedImage.CopyPixels(pixels,stride,0);
+
+            var x1 = (int)last.X;
+            var y1 = (int)last.Y;
+            var index = (x1 + y1 * w) * 3;
+            pixels[index++] = 0;
+            pixels[index++] = 0;
+            pixels[index++] = 0;
+
+            guessedImage.WritePixels(new Int32Rect(0,0,w,h), pixels,stride,0);
+
+            // trigger redraw
+            var temp = guessedImage;
+            GuessedImage = null;
+            GuessedImage = temp;
+        }
+
+
+        // d = 0,1,2 down, move, up
+        private bool down = false;
+        private Point last;
+        internal void Mouse(int d, Point point)
+        {
+            if (d == 0)
+            {
+                down = true;
+                last = point;
+            }
+
+            if (d == 1 && down)
+            {
+                // draw
+                Draw(last,point);
+                last = point;
+            }
+            if (d == 2)
+            {
+                // guess
+                down = false;
+                GuessedText = MakeGuess().ToString();
+            }
+        }
+
+        int MakeGuess()
+        { // from image
+            if (neuralNet != null && GuessedImage != null)
+            {
+                Vector input = new Vector(28*28);
+                var pixels = new byte[28 * 28 * 3];
+                GuessedImage.CopyPixels(new Int32Rect(0, 0, 28, 28), pixels, 28*3, 0);
+
+                for (var i = 0; i < 28 * 28; ++i)
+                {
+                    // grayscale, invert, 0-1
+                    var c = 255 - pixels[i*3];
+                    input[i] = c / 255.0f;
+                }
+
+                var output = neuralNet.FeedForward(input);
+                return Trainer.MaxIndex(output);
+            }
+            return -1;
+        }
+        
+        
 
         private string startStopText = "Start";
         public string StartStopText

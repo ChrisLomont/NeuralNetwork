@@ -21,28 +21,6 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <DockPanel Grid.Column="2">
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                    <Button Command="{Binding ShowDataCommand}">Show data</Button>
-                    <TextBlock Text="{Binding SuccessRatio}"/>
-                    <CheckBox IsChecked="{Binding ShowFailures}" >Show only failures</CheckBox>
-                </StackPanel>
-                <Grid>
-                    <ListBox ItemsSource="{Binding Results}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Background="{Binding Background}">
-                                    <Image Source="{Binding bmp}"></Image>
-                                    <TextBlock Text="{Binding Text}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </DockPanel>
-
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-
             <DockPanel Grid.Column="0">
                 <StackPanel DockPanel.Dock="Top">
                     <UniformGrid DockPanel.Dock="Top" >
@@ -78,6 +56,46 @@
                 </StackPanel>
                 <ListBox ItemsSource="{Binding Messages}"></ListBox>
             </DockPanel>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+            <DockPanel Grid.Column="2">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Button Command="{Binding ShowDataCommand}">Show data</Button>
+                    <TextBlock Text="{Binding SuccessRatio}"/>
+                    <CheckBox IsChecked="{Binding ShowFailures}" >Show only failures</CheckBox>
+                    <Border BorderBrush="Black" CornerRadius="3" BorderThickness="3">
+                        <Grid Name="drawGrid"
+                            Background="Bisque"
+                            MouseDown="UIElement_OnMouseDown" 
+                            MouseMove="UIElement_OnMouseMove" 
+                            MouseUp="UIElement_OnMouseUp"
+                              Width="150"
+                              Height="150"
+                            >
+                            <Image 
+                        Source="{Binding GuessedImage}"
+                                Stretch="Uniform"
+                        />
+                        </Grid>
+                    </Border>
+                    <TextBlock FontSize="70" Text="{Binding GuessedText}"/>
+                    <Button Command="{Binding ClearGuessCommand}">Clear</Button>
+                </StackPanel>
+                <Grid>
+                    <ListBox ItemsSource="{Binding Results}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Background="{Binding Background}">
+                                    <Image Source="{Binding bmp}"></Image>
+                                    <TextBlock Text="{Binding Text}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </DockPanel>
+
 
         </Grid>
 
