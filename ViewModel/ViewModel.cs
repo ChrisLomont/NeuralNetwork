@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -26,11 +29,11 @@ namespace NeuralNet.ViewModel
         public Dispatcher Dispatcher;
         public ViewModel()
         {
-            StartCommand = new RelayCommand(Start);
+            StartStopCommand = new RelayCommand(StartStop);
             ShowDataCommand = new RelayCommand(ShowData);
             SelectedExperiment = Experiments[1];
         }
-        public RelayCommand StartCommand { get;  }
+        public RelayCommand StartStopCommand { get;  }
         public RelayCommand ShowDataCommand { get; }
 
         private Experiment selectedExperiment = null;
@@ -43,6 +46,15 @@ namespace NeuralNet.ViewModel
             }
         }
 
+        private string startStopText = "Start";
+        public string StartStopText
+        {
+            get => startStopText;
+            set
+            {
+                Set<string>(() => this.StartStopText, ref startStopText, value);
+            }
+        }
 
         private float learningRate = 3.0f;
         public float LearningRate
@@ -53,14 +65,34 @@ namespace NeuralNet.ViewModel
                 Set<float>(() => this.LearningRate, ref learningRate, value);
             }
         }
+        private string successRatio = "0/0";
+        public string SuccessRatio
+        {
+            get => successRatio;
+            set
+            {
+                Set<string>(() => this.SuccessRatio, ref successRatio, value);
+            }
+        }
+        private bool showFailures = false;
+        public bool ShowFailures
+        {
+            get => showFailures;
+            set
+            {
+                if (Set<bool>(() => this.ShowFailures, ref showFailures, value))
+                    ShowData();
+            }
+        }
 
-        private int hiddenLayerSize = 15;
-        public int HiddenLayerSize
+
+        private string hiddenLayerSize = "15";
+        public string HiddenLayerSize
         {
             get => hiddenLayerSize;
             set
             {
-                Set<int>(() => this.HiddenLayerSize, ref hiddenLayerSize, value);
+                Set<string>(() => this.HiddenLayerSize, ref hiddenLayerSize, value);
             }
         }
 
@@ -93,10 +125,28 @@ namespace NeuralNet.ViewModel
                 Set<int>(() => this.Epochs, ref epochs, value);
             }
         }
-        void Start()
+        void StartStop()
         {
-            Messages.Clear();
-            TrainExperiment();
+            try
+            {
+            if (StartStopText == "Start")
+            {
+                    StartStopText = "Stop";
+                    Messages.Clear();
+                    TrainExperiment();
+            }
+            else
+            {
+                StartStopText = "Start";
+                if (trainer != null)
+                    trainer.Stop();
+            }
+            }
+            catch (Exception ex)
+            {
+                Messages.Add("Exception: " + ex);
+            }
+
         }
 
         void ShowData()
@@ -107,9 +157,12 @@ namespace NeuralNet.ViewModel
                 var p = dataSet.TestSet[ti];
 
                 var result =  selectedExperiment.HowToVisualize(ti,p.input, p.output, neuralNet.FeedForward(p.input));
-
-                Results.Add(result);
+                if (!result.success || !ShowFailures)
+                    Results.Add(result);
             }
+
+            var successes = dataSet.TestSet.Count - Results.Count(r => !r.success);
+            SuccessRatio = $"{successes}/{dataSet.TestSet.Count}";
         }
 
         public ObservableCollection<Result> Results { get;  } = new ObservableCollection<Result>();
@@ -119,6 +172,7 @@ namespace NeuralNet.ViewModel
             public WriteableBitmap bmp { get; set; }
             public string Text { get; set; }
             public Brush Background { get; set; }
+            public bool success;
         }
 
 
@@ -152,10 +206,12 @@ namespace NeuralNet.ViewModel
                 var computed = Trainer.MaxIndex(computedPt);
                 var desired = Trainer.MaxIndex(outputPt);
 
+                    var success = desired == computed;
             return new Result
             {
             Text = $"{ti}: truth = {desired}, net obtained {computed}, {outputPt} ~ {computedPt}",
-            Background = desired == computed? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink)
+            Background = success ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink),
+                success = success
             };
             }},
 
@@ -199,14 +255,29 @@ namespace NeuralNet.ViewModel
                     var wb = new WriteableBitmap(28, 28, 96.0, 96.0, PixelFormats.Rgb24, null);
                     wb.WritePixels(new Int32Rect(0, 0, 28, 28), pixels, 28 * 3, 0);
 
+                    var success = desired == computed;
                     return new Result
                     {
                         Text = $"{ti}: truth = {desired}, net obtained {computed}",
-                        Background = desired == computed ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink),
-                        bmp = wb
+                        Background = success ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink),
+                        bmp = wb,
+                        success = success
                     };
                 }}
         };
+
+        void AddLayers(List<int> layers, string layerText)
+        {
+            var words = layerText.Split(new char[] {' ',','}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var w in words)
+            {
+                if (!Int16.TryParse(w, out var val))
+                    throw new Exception("Invalid layers descriptor " + w);
+                layers.Add(val);
+            }
+        }
+
+        private Trainer trainer;
 
 
         void TrainExperiment()
@@ -223,9 +294,14 @@ namespace NeuralNet.ViewModel
             };
             var p1 = dataSet.TrainingSet[0];
 
-            neuralNet.Create(p1.input.Size, hiddenLayerSize, p1.output.Size);
+            var layers = new List<int>();
+            layers.Add(p1.input.Size);
+            AddLayers(layers,hiddenLayerSize);
+            layers.Add(p1.output.Size);
 
-            var trainer = new Trainer();
+            neuralNet.Create(layers.ToArray());
+
+                trainer = new Trainer();
 
             Task.Factory.StartNew(
                 () =>

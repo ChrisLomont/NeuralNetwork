@@ -1,13 +1,13 @@
-﻿// #define IN_PLACE // define for faster, in-place work TODO - speed up
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.Net.Configuration;
 using static NeuralNet.Model.ActivationFunctions;
 
 namespace NeuralNet.Model
 {
     /// <summary>
     /// Usage:
-    /// 1. Make NN
+    /// 1. Make NN, optinally set functions
     /// 2. Zero deltas
     /// 3. For each datum, feed forward, then back propagate to deltas
     /// 4. Apply deltas, updates weights
@@ -31,14 +31,8 @@ namespace NeuralNet.Model
             x[0] = input;
             for (var n = 0; n <= NumLayers-2; ++n)
             {
-#if IN_PLACE
-                Matrix.Times(z[n], W[n], x[n]);
-                Vector.Add(z[n], b[n]);
-                x[n + 1] = f[n + 1](z[n]);
-#else
                 z[n] = W[n] * x[n] + b[n];
                 x[n + 1] = f[n + 1](z[n]);
-#endif
             }
             return x[NumLayers - 1];
         }
@@ -108,6 +102,22 @@ namespace NeuralNet.Model
             }
         }
 
+        /* parameters:
+         Neural net:
+         Layers
+         Size of each layer
+         Connection type (so far dense is only option)
+         How to init weights
+         Layer functions
+         
+         Training:   
+         Learning rate
+         Mini batch size
+         Epochs (number of times through data)
+         more - see training:
+
+
+        */
 
         // create with given sizes
         // fills in network, populates weights and bias with (0,1) gaussian 
@@ -139,38 +149,33 @@ namespace NeuralNet.Model
                     dW[n] = new Matrix();
                     db[n] = new Vector(layers[n + 1]);
                     dW[n].Resize(layers[n + 1], layers[n]);
-#if IN_PLACE
-                    z[n] = new Vector(layers[n+1]);
-#endif
 
                     // random filling weights
                     W[n].Randomize(rand.Next);
                     b[n].Randomize(rand.Next);
                 }
-#if IN_PLACE
-                x[n] = new Vector(layers[n]);
-#endif
+            }
+            
+            // activation function: identity on layer 0, logistic on others
+            SetFunc(ActivationType.Identity, 0);
+            SetFunc(ActivationType.Logistic, 1, NumLayers - 1);
 
+        }
 
-                // set up default activation functions
-                // layer 0 identity
-                // layers 1 to LayerCount-2 (inclusive) are ReLU
-                // layer LayerCount-1 is softmax
-                if (0 == n)
-                {
-                    f[n] = Vectorize(Identity);
-                    df[n] = Vectorize(dIdentity);
-                }
-                else if (1 <= n && n <= NumLayers-2)
-                {
-                    f[n] = Vectorize(Logistic);// Vectorize(ReLU);
-                    df[n] = Vectorize(dLogistic);//Vectorize(dReLU);
-                }
-                else if (n == NumLayers - 1)
-                {
-                    f[n] = Vectorize(Logistic);//Vectorize(ReLU); // Softmax;
-                    df[n] = Vectorize(dLogistic);//Vectorize(dReLU); // dSoftmax;
-                }
+        // set activation functions for a single layer 0+, or a range, or all
+        public void SetFunc(ActivationType type, int startLayerInclusive = -1, int endLayerInclusive = -1)
+        {
+            if (startLayerInclusive < 0)
+                startLayerInclusive = 0;
+            if (endLayerInclusive < 0 || endLayerInclusive >= NumLayers)
+                endLayerInclusive = NumLayers - 1;
+            if (endLayerInclusive < startLayerInclusive)
+                endLayerInclusive = startLayerInclusive;
+            var funcPair = ActivationFunctions.Get(type);
+            for (var n = startLayerInclusive; n <= endLayerInclusive; ++n)
+            {
+                f[n] = funcPair.func;
+                df[n] = funcPair.dFunc;
             }
         }
 

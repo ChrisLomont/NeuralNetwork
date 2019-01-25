@@ -1,10 +1,45 @@
 ﻿using System;
 
+
 namespace NeuralNet.Model
 {
+    public class ActivationPair : Tuple<Func<Vector, Vector>, Func<Vector, Vector>>
+    {
+        public ActivationPair(Func<Vector, Vector> func, Func<Vector, Vector> dFunc) : base(func,dFunc)
+        {
+        }
+        public Func<Vector, Vector> func => this.Item1;
+        public Func<Vector, Vector> dFunc => this.Item2;
+    }
+
     public static class ActivationFunctions
     {
         #region Activation functions
+
+        public enum ActivationType
+        {
+            Identity,
+            ReLU,
+            Logistic,
+            Softmax
+        }
+
+        public static ActivationPair Get(ActivationType type)
+        {
+            switch (type)
+            {
+                case ActivationType.Identity:
+                    return new ActivationPair(Vectorize(Identity), Vectorize(Identity));
+                case ActivationType.ReLU:
+                    return new ActivationPair(Vectorize(ReLU),Vectorize(dReLU));
+                case ActivationType.Logistic:
+                    return new ActivationPair(Vectorize(Logistic), Vectorize(dLogistic));
+                case ActivationType.Softmax:
+                    return new ActivationPair(Softmax, dSoftmax);
+            }
+            throw new Exception("Unknown activation type " + type);
+        }
+
 
         // Rectified Linear Unit
         public static float ReLU(float x)

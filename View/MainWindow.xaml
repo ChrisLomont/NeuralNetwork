@@ -22,8 +22,10 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="2">
-                <StackPanel DockPanel.Dock="Top">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                     <Button Command="{Binding ShowDataCommand}">Show data</Button>
+                    <TextBlock Text="{Binding SuccessRatio}"/>
+                    <CheckBox IsChecked="{Binding ShowFailures}" >Show only failures</CheckBox>
                 </StackPanel>
                 <Grid>
                     <ListBox ItemsSource="{Binding Results}">
@@ -58,19 +60,19 @@
                         <Label>Epochs:</Label>
                         <TextBox Text="{Binding Epochs}" Width="70"/>
 
-                        <Label>LearningRate:</Label>
+                        <Label>Learning Rate:</Label>
                         <TextBox Text="{Binding LearningRate}" Width="70"/>
 
-                        <Label>HiddenLayerSize:</Label>
+                        <Label>Hidden Layer(s) Size:</Label>
                         <TextBox Text="{Binding HiddenLayerSize}" Width="70"/>
 
-                        <Label>MiniBatchSize:</Label>
+                        <Label>MiniBatch Size:</Label>
                         <TextBox Text="{Binding MiniBatchSize}" Width="70"/>
 
-                        <Label>RandSeed:</Label>
+                        <Label>Random Seed:</Label>
                         <TextBox Text="{Binding RandSeed}" Width="70"/>
 
-                        <Button Command="{Binding StartCommand}">Start</Button>
+                        <Button Command="{Binding StartStopCommand}" Content="{Binding StartStopText}"/>
 
                     </UniformGrid>
                 </StackPanel>

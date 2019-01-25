@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Configuration;
+using System.Threading;
 
 namespace NeuralNet.Model
 {
@@ -15,6 +16,12 @@ namespace NeuralNet.Model
         Random rand;
 
         List<int> shuffled;
+
+        private int lockedInterlocked;
+        public void Stop()
+        {
+            Interlocked.Increment(ref lockedInterlocked);
+        }
 
         public struct Result
         {
@@ -70,6 +77,7 @@ namespace NeuralNet.Model
             float learningRate = 0.1f
         )
         {
+            lockedInterlocked = 0;
             this.neuralNet = neuralNet;
             this.dataSet = dataSet;
             this.rand = rand;
@@ -102,6 +110,12 @@ namespace NeuralNet.Model
                 var totalTrainingPassed = 0;
                 for (var minibatch = 0; minibatch < state.numBatches; ++minibatch)
                 {
+                    if (lockedInterlocked != 0)
+                    {
+                        // todo
+                        return;
+                    }
+
                     state.batchIndex = minibatch + 1;
                     var batchStart = minibatch * miniBatchSize;
                     var batchSize = Math.Min(miniBatchSize, state.trainingSize - batchStart);
@@ -167,6 +181,12 @@ namespace NeuralNet.Model
                 neuralNet.ZeroDeltas();
             for (var i = 0; i < batchSize; ++i)
             {
+                if (lockedInterlocked != 0)
+                {
+                    // todo
+                    return 0;
+                }
+
                 var dataPoint = getPoint(i);
                 var computed = neuralNet.FeedForward(dataPoint.input);
                 var errorVector = computed - dataPoint.output;
