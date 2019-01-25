@@ -46,7 +46,12 @@ namespace NeuralNet.Model
         {
             var len = items.Count;
             for (var i = 0; i < len; ++i)
-                items[i] = items[i + rand.Next(len - i)];
+            {
+                var j = i + rand.Next(len - i);
+                var temp = items[i];
+                items[i] = items[j];
+                items[j] = temp;
+            }
         }
         public void Train(
             // the net to train
@@ -162,7 +167,7 @@ namespace NeuralNet.Model
                 neuralNet.ZeroDeltas();
             for (var i = 0; i < batchSize; ++i)
             {
-                var dataPoint = dataSet.TrainingSet[shuffled[i]];
+                var dataPoint = getPoint(i);
                 var computed = neuralNet.FeedForward(dataPoint.input);
                 var errorVector = computed - dataPoint.output;
                 totalPassed += Passed(computed, dataPoint.output) ? 1 : 0;

@@ -163,13 +163,13 @@ namespace NeuralNet.Model
                 }
                 else if (1 <= n && n <= NumLayers-2)
                 {
-                    f[n] = Vectorize(ReLU);
-                    df[n] = Vectorize(dReLU);
+                    f[n] = Vectorize(Logistic);// Vectorize(ReLU);
+                    df[n] = Vectorize(dLogistic);//Vectorize(dReLU);
                 }
                 else if (n == NumLayers - 1)
                 {
-                    f[n] = Softmax;
-                    df[n] = dSoftmax;
+                    f[n] = Vectorize(Logistic);//Vectorize(ReLU); // Softmax;
+                    df[n] = Vectorize(dLogistic);//Vectorize(dReLU); // dSoftmax;
                 }
             }
         }

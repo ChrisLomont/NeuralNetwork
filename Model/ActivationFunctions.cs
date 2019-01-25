@@ -38,6 +38,7 @@ namespace NeuralNet.Model
         // Derivative of Softmax function
         public static Vector dSoftmax(Vector x)
         {
+            throw new Exception("Redo softmax derivative and usage");
             // Note often overflows - subtract max from each
             var xm = x[0];
             for (var i = 1; i < x.Size; ++i)

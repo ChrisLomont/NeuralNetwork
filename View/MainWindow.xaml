@@ -56,19 +56,19 @@
                         </ComboBox>
 
                         <Label>Epochs:</Label>
-                        <TextBox Text="{Binding Epochs}" Width="30"/>
+                        <TextBox Text="{Binding Epochs}" Width="70"/>
 
                         <Label>LearningRate:</Label>
-                        <TextBox Text="{Binding LearningRate}" Width="30"/>
+                        <TextBox Text="{Binding LearningRate}" Width="70"/>
 
                         <Label>HiddenLayerSize:</Label>
-                        <TextBox Text="{Binding HiddenLayerSize}" Width="30"/>
+                        <TextBox Text="{Binding HiddenLayerSize}" Width="70"/>
 
                         <Label>MiniBatchSize:</Label>
-                        <TextBox Text="{Binding MiniBatchSize}" Width="30"/>
+                        <TextBox Text="{Binding MiniBatchSize}" Width="70"/>
 
                         <Label>RandSeed:</Label>
-                        <TextBox Text="{Binding RandSeed}" Width="30"/>
+                        <TextBox Text="{Binding RandSeed}" Width="70"/>
 
                         <Button Command="{Binding StartCommand}">Start</Button>
 

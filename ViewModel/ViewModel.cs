@@ -28,13 +28,6 @@ namespace NeuralNet.ViewModel
         {
             StartCommand = new RelayCommand(Start);
             ShowDataCommand = new RelayCommand(ShowData);
-            //NNTest.TestSizes();
-            //Test();
-            //NNTest.Test1();
-            //LearnFixed(0.1f);
-            //LearnFixed(0.01f);
-            //LearnLinear(0.01f);
-            //TrainMNIST();
             SelectedExperiment = Experiments[1];
         }
         public RelayCommand StartCommand { get;  }
@@ -81,7 +74,7 @@ namespace NeuralNet.ViewModel
             }
         }
 
-        private int randSeed = 30;
+        private int randSeed = 12345;
         public int RandSeed
         {
             get => randSeed;
@@ -154,7 +147,7 @@ namespace NeuralNet.ViewModel
              *
              *
              */
-            new Experiment {Name="Testing", GetData = ()=>DataSet.LoadSimple(1000,200,20), HowToVisualize = (ti,inputPt,outputPt,computedPt) =>
+            new Experiment {Name="Testing", GetData = ()=>DataSet.LoadSimple(1000,200,10), HowToVisualize = (ti,inputPt,outputPt,computedPt) =>
                 {
                 var computed = Trainer.MaxIndex(computedPt);
                 var desired = Trainer.MaxIndex(outputPt);
@@ -237,7 +230,10 @@ namespace NeuralNet.ViewModel
             Task.Factory.StartNew(
                 () =>
                 {
-                    var printFreq = 1;
+                    // want 1-10 per epoch
+                    var trainingLength = dataSet.TrainingSet.Count;
+                    var batches = (trainingLength + miniBatchSize - 1) / miniBatchSize;
+                    var printFreq = Math.Max(batches / 10, 1);
                     try
                     {
                         Log("Training started....");
@@ -307,71 +303,6 @@ namespace NeuralNet.ViewModel
         }
 
         public ObservableCollection<string> Messages { get;  } = new ObservableCollection<string>();
-
-        //learning 0.1 here too wild, diverges, 0.01 works
-        public void LearnFixed(float learningRate)
-        {
-            Messages.Add($"Learn fixed, rate {learningRate:F4}");
-            var net = new SimpleNeuralNet();
-            net.Random = new Random(1);
-            net.Create(2, 2, 1);
-            for (var n = 1; n < net.NumLayers; ++n)
-            {
-                net.f[n] = Vectorize(Identity);
-                net.df[n] = Vectorize(dIdentity);
-            }
-
-            var input = new Vector(0.4f, 1.3f);
-            var ans = new Vector(6.0f);
-            for (var p = 0; p < 100; ++p)
-            {
-                var output = net.FeedForward(input);
-                net.Backpropagate(learningRate, output - ans);
-                var (name, val) = net.Bounds();
-                Messages.Add($"{p}: {output}, {name}:{val}");
-            }
-        }
-
-        public void LearnLinear(float learningRate)
-        {
-            Messages.Add($"Learn linear, rate {learningRate:F4}");
-
-            // make dataset, same training and test
-            var rand = new Random(1234);
-            var inputSize = rand.Next(2, 5);
-            var outputSize = rand.Next(2, 5);
-
-            var trans = new Matrix();
-            trans.Resize(outputSize,inputSize);
-            var gauss = new Gaussian(rand);
-            trans.Randomize(gauss.Next);
-
-            var ds = new DataSet();
-            for (var i = 0; i < 10; ++i)
-            {
-                var input = new Vector(inputSize);
-                input.Randomize(gauss.Next);
-                var dp = new DataPoint(input, trans*input);
-                ds.TrainingSet.Add(dp);
-                ds.TestSet.Add(dp);
-            }
-
-            var trainer = new Trainer();
-
-            var net = new SimpleNeuralNet();
-            net.Random = new Random(1234);
-            net.Create(inputSize, inputSize*outputSize, outputSize);
-            for (var n = 1; n < net.NumLayers; ++n)
-            {
-                net.f[n] = Vectorize(Identity);
-                net.df[n] = Vectorize(dIdentity);
-            }
-
-            //trainer.Train
-            //    (
-            //    net, ds, message:Messages.Add, singleStep:true
-            //    );
-        }
 
 
     }
