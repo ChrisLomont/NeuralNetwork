@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NeuralNet.Model
 {
@@ -21,7 +18,7 @@ namespace NeuralNet.Model
 
     public class DataSet
     {
-        public List<DataPoint> TrainingSet { get;  } = new List<DataPoint>();
+        public List<DataPoint> TrainingSet { get; } = new List<DataPoint>();
         public List<DataPoint> TestSet { get; } = new List<DataPoint>();
 
         public void Trim(int trainingSize, int testSize)
@@ -52,9 +49,9 @@ namespace NeuralNet.Model
         }
 
         void Load(
-            ByteBuffer dataBuffer, int header1, int h1, int d1, 
+            ByteBuffer dataBuffer, int header1, int h1, int d1,
             ByteBuffer labelBuffer, int header2, int h2, int d2,
-            int numEntries, 
+            int numEntries,
             List<DataPoint> data)
         {
             var b1 = dataBuffer;
@@ -82,29 +79,29 @@ namespace NeuralNet.Model
                 // input vector
                 var input = new Vector(d1);
                 for (var j = 0; j < d1; ++j)
-                    input[j] = b1.Read()/255.0f; // gray value 0 (white) to 255 (black)
+                    input[j] = b1.Read() / 255.0f; // gray value 0 (white) to 255 (black)
 
                 // output vector
                 var output = new Vector(10);
                 var label = b2.Read(); // label 0-9
                 output[(int)label] = 1.0f;
-                
-                data.Add(new DataPoint(input,output));
+
+                data.Add(new DataPoint(input, output));
             }
         }
         public static DataSet LoadMNIST(string path)
         {
             var ds = new DataSet();
             ds.Load(
-                new ByteBuffer(Path.Combine(path, "train-images.idx3-ubyte")), 0x803,2,28*28,
-                new ByteBuffer(Path.Combine(path, "train-labels.idx1-ubyte")), 0x801,0,1,
-                60000, 
+                new ByteBuffer(Path.Combine(path, "train-images.idx3-ubyte")), 0x803, 2, 28 * 28,
+                new ByteBuffer(Path.Combine(path, "train-labels.idx1-ubyte")), 0x801, 0, 1,
+                60000,
                 ds.TrainingSet
             );
             ds.Load(
                 new ByteBuffer(Path.Combine(path, "t10k-images.idx3-ubyte")), 0x803, 2, 28 * 28,
                 new ByteBuffer(Path.Combine(path, "t10k-labels.idx1-ubyte")), 0x801, 0, 1,
-                10000, 
+                10000,
                 ds.TestSet
             );
             return ds;
@@ -121,7 +118,7 @@ namespace NeuralNet.Model
                 var pt = new Vector(vecLength);
                 var index = rand.Next(vecLength);
                 pt[index] = 1.0f;
-                ds.TrainingSet.Add(new DataPoint(pt,pt));
+                ds.TrainingSet.Add(new DataPoint(pt, pt));
             }
             for (var i = 0; i < testSize; ++i)
             {

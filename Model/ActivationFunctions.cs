@@ -5,7 +5,7 @@ namespace NeuralNet.Model
 {
     public class ActivationPair : Tuple<Func<Vector, Vector>, Func<Vector, Vector>>
     {
-        public ActivationPair(Func<Vector, Vector> func, Func<Vector, Vector> dFunc) : base(func,dFunc)
+        public ActivationPair(Func<Vector, Vector> func, Func<Vector, Vector> dFunc) : base(func, dFunc)
         {
         }
         public Func<Vector, Vector> func => this.Item1;
@@ -31,7 +31,7 @@ namespace NeuralNet.Model
                 case ActivationType.Identity:
                     return new ActivationPair(Vectorize(Identity), Vectorize(Identity));
                 case ActivationType.ReLU:
-                    return new ActivationPair(Vectorize(ReLU),Vectorize(dReLU));
+                    return new ActivationPair(Vectorize(ReLU), Vectorize(dReLU));
                 case ActivationType.Logistic:
                     return new ActivationPair(Vectorize(Logistic), Vectorize(dLogistic));
                 case ActivationType.Softmax:
@@ -65,7 +65,7 @@ namespace NeuralNet.Model
             var sum = 0.0f;
             for (var i = 0; i < x.Size; ++i)
             {
-                ans[i] = (float)Math.Exp(x[i]-xm);
+                ans[i] = (float)Math.Exp(x[i] - xm);
                 sum += ans[i];
             }
             return ans * (1.0f / sum);
@@ -73,34 +73,22 @@ namespace NeuralNet.Model
         // Derivative of Softmax function
         public static Vector dSoftmax(Vector x)
         {
-            throw new Exception("Redo softmax derivative and usage");
-            // Note often overflows - subtract max from each
-            var xm = x[0];
-            for (var i = 1; i < x.Size; ++i)
-                xm = Math.Max(x[i], xm);
+            throw new Exception("Softmax derivative not implemented");
+            // todo - use this with a different cost function, not the squares one
+            // todo - tie these together: final activation func, derivative, and cost function
+            // squares cost ok with logistic final
+            var s = Softmax(x);
+            for (var j = 0; j < x.Size; ++j)
+            { // DjSi = Si(dij - Sj)
 
-            var ans = new Vector(x.Size);
-            var sum = 0.0f;
-            for (var i = 0; i < x.Size; ++i)
-            {
-                ans[i] = (float)Math.Exp(x[i]-xm);
-                sum += ans[i];
             }
 
-            // ith spot : (-(e^xi)^2 + exi * sum)/(sum*sum)
-            var s2 = sum * sum;
-            for (var i = 0; i < x.Size; ++i)
-            {
-                var exi = ans[i];
-                ans[i] = exi*(sum - exi) / s2;
-            }
-            return ans;
         }
 
-            // Logistic function
-            public static float Logistic(float x)
+        // Logistic function
+        public static float Logistic(float x)
         {
-            return (float)(1.0 / (1+Math.Exp(-x)));
+            return (float)(1.0 / (1 + Math.Exp(-x)));
         }
         // Derivative of Logistic function
         public static float dLogistic(float x)

@@ -1,19 +1,16 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using NeuralNet.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using NeuralNet.Model;
 using static NeuralNet.Model.ActivationFunctions;
-using Matrix = NeuralNet.Model.Matrix;
 using Vector = NeuralNet.Model.Vector;
 
 /* TODO
@@ -36,7 +33,7 @@ namespace NeuralNet.ViewModel
             SelectedExperiment = Experiments[1];
             ClearGuess();
         }
-        public RelayCommand StartStopCommand { get;  }
+        public RelayCommand StartStopCommand { get; }
         public RelayCommand ShowDataCommand { get; }
         public RelayCommand ClearGuessCommand { get; }
 
@@ -70,14 +67,14 @@ namespace NeuralNet.ViewModel
             }
         }
 
-        
+
         void ClearGuess()
         {
-            var pixels = new byte[28*28*3];
+            var pixels = new byte[28 * 28 * 3];
             for (var i = 0; i < 28 * 28 * 3; ++i)
                 pixels[i] = 255;
-            var img = new WriteableBitmap(28,28,96.0,96.0,PixelFormats.Rgb24,null);
-            img.WritePixels(new Int32Rect(0,0,28,28),pixels,28*3, 0);
+            var img = new WriteableBitmap(28, 28, 96.0, 96.0, PixelFormats.Rgb24, null);
+            img.WritePixels(new Int32Rect(0, 0, 28, 28), pixels, 28 * 3, 0);
             GuessedImage = img;
         }
 
@@ -87,9 +84,9 @@ namespace NeuralNet.ViewModel
                 ClearGuess();
             var w = guessedImage.PixelWidth;
             var h = guessedImage.PixelHeight;
-            byte [] pixels = new byte[w*h*3];
+            byte[] pixels = new byte[w * h * 3];
             var stride = w * 3;
-            guessedImage.CopyPixels(pixels,stride,0);
+            guessedImage.CopyPixels(pixels, stride, 0);
 
             var x1 = (int)last.X;
             var y1 = (int)last.Y;
@@ -98,7 +95,7 @@ namespace NeuralNet.ViewModel
             pixels[index++] = 0;
             pixels[index++] = 0;
 
-            guessedImage.WritePixels(new Int32Rect(0,0,w,h), pixels,stride,0);
+            guessedImage.WritePixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
 
             // trigger redraw
             var temp = guessedImage;
@@ -121,7 +118,7 @@ namespace NeuralNet.ViewModel
             if (d == 1 && down)
             {
                 // draw
-                Draw(last,point);
+                Draw(last, point);
                 last = point;
             }
             if (d == 2)
@@ -136,14 +133,14 @@ namespace NeuralNet.ViewModel
         { // from image
             if (neuralNet != null && GuessedImage != null)
             {
-                Vector input = new Vector(28*28);
+                Vector input = new Vector(28 * 28);
                 var pixels = new byte[28 * 28 * 3];
-                GuessedImage.CopyPixels(new Int32Rect(0, 0, 28, 28), pixels, 28*3, 0);
+                GuessedImage.CopyPixels(new Int32Rect(0, 0, 28, 28), pixels, 28 * 3, 0);
 
                 for (var i = 0; i < 28 * 28; ++i)
                 {
                     // grayscale, invert, 0-1
-                    var c = 255 - pixels[i*3];
+                    var c = 255 - pixels[i * 3];
                     input[i] = c / 255.0f;
                 }
 
@@ -152,8 +149,8 @@ namespace NeuralNet.ViewModel
             }
             return -1;
         }
-        
-        
+
+
 
         private string startStopText = "Start";
         public string StartStopText
@@ -238,18 +235,18 @@ namespace NeuralNet.ViewModel
         {
             try
             {
-            if (StartStopText == "Start")
-            {
+                if (StartStopText == "Start")
+                {
                     StartStopText = "Stop";
                     Messages.Clear();
                     TrainExperiment();
-            }
-            else
-            {
-                StartStopText = "Start";
-                if (trainer != null)
-                    trainer.Stop();
-            }
+                }
+                else
+                {
+                    StartStopText = "Start";
+                    if (trainer != null)
+                        trainer.Stop();
+                }
             }
             catch (Exception ex)
             {
@@ -265,7 +262,7 @@ namespace NeuralNet.ViewModel
             {
                 var p = dataSet.TestSet[ti];
 
-                var result =  selectedExperiment.HowToVisualize(ti,p.input, p.output, neuralNet.FeedForward(p.input));
+                var result = selectedExperiment.HowToVisualize(ti, p.input, p.output, neuralNet.FeedForward(p.input));
                 if (!result.success || !ShowFailures)
                     Results.Add(result);
             }
@@ -274,7 +271,7 @@ namespace NeuralNet.ViewModel
             SuccessRatio = $"{successes}/{dataSet.TestSet.Count}";
         }
 
-        public ObservableCollection<Result> Results { get;  } = new ObservableCollection<Result>();
+        public ObservableCollection<Result> Results { get; } = new ObservableCollection<Result>();
 
         public class Result
         {
@@ -304,7 +301,7 @@ namespace NeuralNet.ViewModel
             public Func<int, Vector, Vector, Vector, Result> HowToVisualize { get; set; }
         };
 
-        public ObservableCollection<Experiment> Experiments { get; set;  } = new ObservableCollection<Experiment>
+        public ObservableCollection<Experiment> Experiments { get; set; } = new ObservableCollection<Experiment>
         {
             /* Testing set to debug network
              *
@@ -377,7 +374,7 @@ namespace NeuralNet.ViewModel
 
         void AddLayers(List<int> layers, string layerText)
         {
-            var words = layerText.Split(new char[] {' ',','}, StringSplitOptions.RemoveEmptyEntries);
+            var words = layerText.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var w in words)
             {
                 if (!Int16.TryParse(w, out var val))
@@ -405,12 +402,12 @@ namespace NeuralNet.ViewModel
 
             var layers = new List<int>();
             layers.Add(p1.input.Size);
-            AddLayers(layers,hiddenLayerSize);
+            AddLayers(layers, hiddenLayerSize);
             layers.Add(p1.output.Size);
 
             neuralNet.Create(layers.ToArray());
 
-                trainer = new Trainer();
+            trainer = new Trainer();
 
             Task.Factory.StartNew(
                 () =>
@@ -470,7 +467,7 @@ namespace NeuralNet.ViewModel
             net.b[0][1] = 6;
 
             net.W[1][0, 0] = -1;
-            net.W[1][0, 1] =  1;
+            net.W[1][0, 1] = 1;
             net.b[1][0] = 7;
 
             net.f[1] = Vectorize(Identity);
@@ -482,12 +479,12 @@ namespace NeuralNet.ViewModel
             var output = net.FeedForward(new Vector(3.0f, 5.0f)); // should answer 16
             Messages.Add($"Test: 16={output}");
 
-            net.Backpropagate(0.1f,output); // train towards zero vector
+            net.Backpropagate(0.1f, output); // train towards zero vector
             output = net.FeedForward(new Vector(3.0f, 5.0f)); // should answer 16
             Messages.Add($"Test: 16={output}");
         }
 
-        public ObservableCollection<string> Messages { get;  } = new ObservableCollection<string>();
+        public ObservableCollection<string> Messages { get; } = new ObservableCollection<string>();
 
 
     }

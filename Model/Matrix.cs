@@ -6,7 +6,7 @@ namespace NeuralNet.Model
     public class Matrix
     {
         public int Rows, Columns;
-        float [,] data;
+        float[,] data;
         public void Resize(int rows, int columns)
         {
             Rows = rows;
@@ -21,8 +21,8 @@ namespace NeuralNet.Model
         public void Randomize(Func<float> source)
         {
             for (var i = 0; i < Rows; ++i)
-            for (var j = 0; j < Columns; ++j)
-                this[i, j] = source();
+                for (var j = 0; j < Columns; ++j)
+                    this[i, j] = source();
         }
 
         public float this[int row, int col]

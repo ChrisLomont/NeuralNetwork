@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Configuration;
 using System.Threading;
 
 namespace NeuralNet.Model
@@ -72,7 +71,7 @@ namespace NeuralNet.Model
             // number of epochs to do (complete passes through data)
             int epochs = 100,
             // number to do per mini batch
-            int miniBatchSize = 100, 
+            int miniBatchSize = 100,
             // learning rate
             float learningRate = 0.1f
         )
@@ -102,7 +101,7 @@ namespace NeuralNet.Model
             {
                 Shuffle(rand, shuffled);
 
-                state.curEpoch = epoch+1;
+                state.curEpoch = epoch + 1;
                 state.trainingProcessed = 0;
                 state.testProcessed = 0;
 
@@ -172,7 +171,7 @@ namespace NeuralNet.Model
         }
 
         // process data, return number correct
-        int ProcessBatch(Func<int,DataPoint> getPoint, int batchSize, bool training)
+        int ProcessBatch(Func<int, DataPoint> getPoint, int batchSize, bool training)
         {
 
             // run through dataset, total avg error

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Configuration;
 using static NeuralNet.Model.ActivationFunctions;
 
 namespace NeuralNet.Model
@@ -29,7 +28,7 @@ namespace NeuralNet.Model
         public Vector FeedForward(Vector input)
         {
             x[0] = input;
-            for (var n = 0; n <= NumLayers-2; ++n)
+            for (var n = 0; n <= NumLayers - 2; ++n)
             {
                 z[n] = W[n] * x[n] + b[n];
                 x[n + 1] = f[n + 1](z[n]);
@@ -44,7 +43,7 @@ namespace NeuralNet.Model
         {
             ZeroDeltas();
             BackpropagateToDeltas(errVector);
-            ModifyWeights(learningRate,1);
+            ModifyWeights(learningRate, 1);
         }
 
 
@@ -52,13 +51,13 @@ namespace NeuralNet.Model
         // errVector is often 'output - truth' vector
         public void BackpropagateToDeltas(Vector errVector)
         {
-            for (var n = NumLayers-2; n >= 0; --n)
+            for (var n = NumLayers - 2; n >= 0; --n)
             {
                 // 1. Initial eps vector
-                if (n == NumLayers-2)
-                    eps[n] = Vector.ComponentTimes(errVector, df[n+1](z[n]));
+                if (n == NumLayers - 2)
+                    eps[n] = Vector.ComponentTimes(errVector, df[n + 1](z[n]));
                 else // 2. next eps vector
-                    eps[n] = Vector.ComponentTimes(eps[n+1]*W[n+1], df[n+1](z[n]));
+                    eps[n] = Vector.ComponentTimes(eps[n + 1] * W[n + 1], df[n + 1](z[n]));
 
                 for (var i = 0; i < LayerNodeCounts[n + 1]; ++i)
                 {
@@ -77,12 +76,12 @@ namespace NeuralNet.Model
         public void ZeroDeltas()
         {
             for (var n = NumLayers - 2; n >= 0; --n)
-            for (var i = 0; i < LayerNodeCounts[n + 1]; ++i)
-            {
-                db[n][i] = 0;
-                for (var j = 0; j < LayerNodeCounts[n]; ++j)
-                    dW[n][i, j] = 0;
-            }
+                for (var i = 0; i < LayerNodeCounts[n + 1]; ++i)
+                {
+                    db[n][i] = 0;
+                    for (var j = 0; j < LayerNodeCounts[n]; ++j)
+                        dW[n][i, j] = 0;
+                }
         }
 
         // call at end of minibatch
@@ -125,7 +124,7 @@ namespace NeuralNet.Model
         {
             NumLayers = layers.Length;
             if (NumLayers <= 1)
-                throw new ArgumentException("Not enough layers","layers");
+                throw new ArgumentException("Not enough layers", "layers");
             LayerNodeCounts = new int[NumLayers];
             Array.Copy(layers, LayerNodeCounts, NumLayers);
             W = new Matrix[NumLayers - 1];
@@ -134,7 +133,7 @@ namespace NeuralNet.Model
             db = new Vector[NumLayers - 1];
             x = new Vector[NumLayers];
             z = new Vector[NumLayers - 1];
-            eps = new Vector[NumLayers-1];
+            eps = new Vector[NumLayers - 1];
             f = new Func<Vector, Vector>[NumLayers];  // entry 0 unused
             df = new Func<Vector, Vector>[NumLayers]; // entry unused
 
@@ -155,7 +154,7 @@ namespace NeuralNet.Model
                     b[n].Randomize(rand.Next);
                 }
             }
-            
+
             // activation function: identity on layer 0, logistic on others
             SetFunc(ActivationType.Identity, 0);
             SetFunc(ActivationType.Logistic, 1, NumLayers - 1);
@@ -182,7 +181,7 @@ namespace NeuralNet.Model
         // zero all weights. Useful for testing
         public void ZeroAll()
         {
-            for (var n = 0; n < NumLayers-1; ++n)
+            for (var n = 0; n < NumLayers - 1; ++n)
             {
                 for (var i = 0; i < LayerNodeCounts[n + 1]; ++i)
                 {
@@ -190,7 +189,7 @@ namespace NeuralNet.Model
                     b[n][i] = 0;
                     for (var j = 0; j < LayerNodeCounts[n]; ++j)
                     {
-                        Debug.Assert(!float.IsNaN(W[n][i,j]));
+                        Debug.Assert(!float.IsNaN(W[n][i, j]));
                         W[n][i, j] = 0;
                     }
                 }
@@ -222,7 +221,7 @@ namespace NeuralNet.Model
                     }
                 }
             });
-            return (name,val);
+            return (name, val);
         }
 
         /// <summary>
@@ -237,32 +236,32 @@ namespace NeuralNet.Model
             });
         }
 
-        void WalkValues(Action<float,string> action)
+        void WalkValues(Action<float, string> action)
         {
-            Action<Vector,string> TestV = (v,s) =>
+            Action<Vector, string> TestV = (v, s) =>
             {
                 if (v == null) return;
                 for (var i = 0; i < v.Size; ++i)
                     action(v[i], s);
             };
-            Action<Matrix,string> TestM = (m,s) =>
+            Action<Matrix, string> TestM = (m, s) =>
             {
                 if (m == null) return;
                 for (var i = 0; i < m.Rows; ++i)
-                for (var j = 0; j < m.Columns; ++j)
-                    action(m[i,j],s);
+                    for (var j = 0; j < m.Columns; ++j)
+                        action(m[i, j], s);
             };
 
             for (var n = 0; n < NumLayers - 1; ++n)
             {
-                TestV(b[n],$"b[{n}]");
-                TestM(W[n],$"W[{n}]");
-                TestV(z[n],$"z[{n}]");
-                TestV(x[n],$"x[{n}]");
-                TestV(eps[n],"eps[{n}]");
+                TestV(b[n], $"b[{n}]");
+                TestM(W[n], $"W[{n}]");
+                TestV(z[n], $"z[{n}]");
+                TestV(x[n], $"x[{n}]");
+                TestV(eps[n], "eps[{n}]");
             }
 
-            TestV(x[NumLayers-1],$"x[{NumLayers-1}]");
+            TestV(x[NumLayers - 1], $"x[{NumLayers - 1}]");
         }
 
         #region Data
@@ -296,7 +295,7 @@ namespace NeuralNet.Model
         // Intermediate values Wx+b
         public Vector[] z;
         // Intermediates f(z)
-        public Vector[] x; 
+        public Vector[] x;
 
 
         #endregion

@@ -1,25 +1,21 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NeuralNet.Model
 {
     public class Vector
     {
         public int Size;
-        float [] data;
+        float[] data;
 
         public Vector(int size)
         {
             Resize(size);
         }
-        public Vector(params float [] values)
+        public Vector(params float[] values)
         {
             Resize(values.Length);
-            Array.Copy(values,data,Size);
+            Array.Copy(values, data, Size);
         }
 
         public void Resize(int size)
@@ -51,7 +47,7 @@ namespace NeuralNet.Model
             for (var i = 0; i < ans.Size; ++i)
                 ans[i] += delta[i];
         }
-        public static Vector operator+(Vector left, Vector right)
+        public static Vector operator +(Vector left, Vector right)
         {
             var ans = new Vector(left.Size);
             for (var i = 0; i < ans.Size; ++i)
