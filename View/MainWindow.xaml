@@ -1,16 +1,15 @@
-﻿<Window x:Class="NeuralNet.MainWindow"
+﻿<Window x:Class="Lomont.NeuralNet.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NeuralNet"
-        xmlns:vm="clr-namespace:NeuralNet.ViewModel"
+        xmlns:viewModel="clr-namespace:Lomont.NeuralNet.ViewModel"
         mc:Ignorable="d"
         Title="Chris Lomont's Neural Net Octagon vPI" Height="450" Width="800"
         Loaded="OnLoaded"
         >
     <Window.DataContext>
-        <vm:ViewModel/>
+        <viewModel:ViewModel/>
     </Window.DataContext>
 
     <DockPanel>

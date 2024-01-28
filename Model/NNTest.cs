@@ -1,6 +1,6 @@
-﻿using static NeuralNet.Model.ActivationFunctions;
+﻿using static Lomont.NeuralNet.Model.ActivationFunctions;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     // Test the NN
     static class NNTest

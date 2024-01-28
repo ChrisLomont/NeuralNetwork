@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 
-namespace NeuralNet
+namespace Lomont.NeuralNet.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

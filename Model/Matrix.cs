@@ -1,7 +1,8 @@
 ﻿// #define COL_MAJOR // reverse memory ordering in matrix
+
 using System;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     public class Matrix
     {

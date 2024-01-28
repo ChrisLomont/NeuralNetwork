@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using static NeuralNet.Model.ActivationFunctions;
+using static Lomont.NeuralNet.Model.ActivationFunctions;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     /// <summary>
     /// Usage:

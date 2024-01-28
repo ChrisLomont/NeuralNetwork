@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     public class Vector
     {

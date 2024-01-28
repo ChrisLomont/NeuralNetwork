@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E0002A93-C1CC-44E3-A1CE-B26EEC5580C3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>NeuralNet</RootNamespace>
+    <RootNamespace>Lomont.NeuralNet</RootNamespace>
     <AssemblyName>NeuralNet</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,7 +1,6 @@
 ﻿using System;
 
-
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     public class ActivationPair : Tuple<Func<Vector, Vector>, Func<Vector, Vector>>
     {

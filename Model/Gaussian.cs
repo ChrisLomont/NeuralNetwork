@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     // source for (0,1) Gaussian rand numbers
     public class Gaussian

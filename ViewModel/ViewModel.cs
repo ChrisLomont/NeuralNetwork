@@ -1,7 +1,4 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using NeuralNet.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,8 +7,11 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using static NeuralNet.Model.ActivationFunctions;
-using Vector = NeuralNet.Model.Vector;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using Lomont.NeuralNet.Model;
+using static Lomont.NeuralNet.Model.ActivationFunctions;
+using Vector = Lomont.NeuralNet.Model.Vector;
 
 /* TODO
  * 1. Save/load NN state between runs, and training info (how it got here)
@@ -20,7 +20,7 @@ using Vector = NeuralNet.Model.Vector;
  *
  */
 
-namespace NeuralNet.ViewModel
+namespace Lomont.NeuralNet.ViewModel
 {
     class ViewModel : ViewModelBase
     {

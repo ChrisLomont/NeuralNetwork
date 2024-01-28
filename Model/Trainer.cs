@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace NeuralNet.Model
+namespace Lomont.NeuralNet.Model
 {
     // Train a neural net
     public class Trainer

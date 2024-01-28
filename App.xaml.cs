@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace NeuralNet
+namespace Lomont.NeuralNet
 {
     /// <summary>
     /// Interaction logic for App.xaml
