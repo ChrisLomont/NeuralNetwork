@@ -53,7 +53,7 @@ namespace Lomont.NeuralNet.ViewModel
             var rnd = new Random(1234); // reproducible for demonstration
             List<int> pixelsChanged = new();
 
-            while (!done)
+            while (!done && pixelsChanged.Count < 100)
             {
 
                 var index = rnd.Next(w * h) * 3;
