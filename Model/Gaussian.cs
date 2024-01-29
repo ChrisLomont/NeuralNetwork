@@ -8,11 +8,7 @@ namespace Lomont.NeuralNet.Model
         // nonzero seed to set it
         public Gaussian(Random rand = null)
         {
-
-            if (rand == null)
-                this.rand = new Random();
-            else
-                this.rand = rand;
+            this.rand = rand ?? new Random();
         }
 
         readonly Random rand;

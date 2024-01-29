@@ -80,9 +80,12 @@
                     </Border>
                     <TextBlock FontSize="70" Text="{Binding GuessedText}"/>
                     <Button Command="{Binding ClearGuessCommand}">Clear</Button>
+                    <Button Command="{Binding AttackCommand}" ToolTip="Try to generate pixels that change output class">Attack</Button>
                 </StackPanel>
                 <Grid>
-                    <ListBox ItemsSource="{Binding Results}">
+                    <ListBox ItemsSource="{Binding Results}"
+                             SelectedItem="{Binding SelectedOutput}"
+                             >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Background="{Binding Background}">

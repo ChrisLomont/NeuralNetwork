@@ -6,7 +6,8 @@ namespace Lomont.NeuralNet.Model
 {
     public class Matrix
     {
-        public int Rows, Columns;
+        public int Rows { get; private set;  }
+        public int Columns { get; private set; }
         float[,] data;
         public void Resize(int rows, int columns)
         {

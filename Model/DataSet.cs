@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Xps;
 
 namespace Lomont.NeuralNet.Model
 {
@@ -19,8 +18,8 @@ namespace Lomont.NeuralNet.Model
 
     public class DataSet
     {
-        public List<DataPoint> TrainingSet { get; } = new List<DataPoint>();
-        public List<DataPoint> TestSet { get; } = new List<DataPoint>();
+        public List<DataPoint> TrainingSet { get; } = new();
+        public List<DataPoint> TestSet { get; } = new();
 
         public void Trim(int trainingSize, int testSize)
         {
@@ -135,7 +134,7 @@ namespace Lomont.NeuralNet.Model
         // same points for test set
         public static DataSet LoadSimple(int trainingSize, int testSize, int vecLength)
         {
-            Random rand = new Random(1234);
+            var rand = new Random(1234);
             var ds = new DataSet();
             for (var i = 0; i < trainingSize; ++i)
             {

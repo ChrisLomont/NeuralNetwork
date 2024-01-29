@@ -20,7 +20,7 @@ namespace Lomont.NeuralNet.Model
         // fills in network, populates weights and bias with (0,1) gaussian 
         public SimpleNeuralNet(params int[] layers)
         {
-            if (layers != null && layers.Length > 1)
+            if (layers is { Length: > 1 })
                 Create(layers);
         }
 
@@ -124,7 +124,7 @@ namespace Lomont.NeuralNet.Model
         {
             NumLayers = layers.Length;
             if (NumLayers <= 1)
-                throw new ArgumentException("Not enough layers", "layers");
+                throw new ArgumentException("Not enough layers", nameof(layers));
             LayerNodeCounts = new int[NumLayers];
             Array.Copy(layers, LayerNodeCounts, NumLayers);
             W = new Matrix[NumLayers - 1];
@@ -173,7 +173,7 @@ namespace Lomont.NeuralNet.Model
             var funcPair = Get(type);
             for (var n = startLayerInclusive; n <= endLayerInclusive; ++n)
             {
-                f[n] = funcPair.func;
+                f[n] = funcPair.Func;
                 df[n] = funcPair.dFunc;
             }
         }

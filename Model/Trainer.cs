@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Windows;
 
 namespace Lomont.NeuralNet.Model
 {
@@ -42,7 +43,7 @@ namespace Lomont.NeuralNet.Model
             {
                 return $"Epoch {curEpoch}/{maxEpochs}, batch {batchIndex}/{numBatches}" +
                        $", train & test error ({trainingError:F3},{testError:F3})" +
-                       $", Elapsed ms {elapsedMs}, bounds {boundsName}{boundsValue}";
+                       $", Elapsed ms {elapsedMs}, bounds {boundsName} {boundsValue}";
             }
         };
 
@@ -92,7 +93,7 @@ namespace Lomont.NeuralNet.Model
             for (var i = 0; i < state.trainingSize; ++i)
                 shuffled.Add(i);
 
-            int startMs = Environment.TickCount, endMs = 0;
+            var startMs = Environment.TickCount;
             state.numBatches = (state.trainingSize + miniBatchSize - 1) / miniBatchSize;
 
             for (var epoch = 0; epoch < state.maxEpochs; epoch++)
@@ -105,6 +106,7 @@ namespace Lomont.NeuralNet.Model
 
                 // do training via SGD for one epoch
                 var totalTrainingPassed = 0;
+                var endMs = 0;
                 for (var minibatch = 0; minibatch < state.numBatches; ++minibatch)
                 {
                     if (lockedInterlocked != 0)
@@ -126,7 +128,7 @@ namespace Lomont.NeuralNet.Model
                     endMs = Environment.TickCount;
                     state.elapsedMs = endMs - startMs;
                     (state.boundsName, state.boundsValue) = neuralNet.Bounds();
-                    resultAction(state);
+                    if (resultAction != null) resultAction(state);
                 }
 
                 // check against test data
@@ -140,8 +142,7 @@ namespace Lomont.NeuralNet.Model
                 endMs = Environment.TickCount;
                 state.elapsedMs = endMs - startMs;
                 (state.boundsName, state.boundsValue) = neuralNet.Bounds();
-                resultAction(state);
-
+                if (resultAction != null) resultAction(state);
             }
         }
 

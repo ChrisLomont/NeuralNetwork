@@ -2,14 +2,7 @@
 
 namespace Lomont.NeuralNet.Model
 {
-    public class ActivationPair : Tuple<Func<Vector, Vector>, Func<Vector, Vector>>
-    {
-        public ActivationPair(Func<Vector, Vector> func, Func<Vector, Vector> dFunc) : base(func, dFunc)
-        {
-        }
-        public Func<Vector, Vector> func => Item1;
-        public Func<Vector, Vector> dFunc => Item2;
-    }
+    public record ActivationPair(Func<Vector, Vector> Func, Func<Vector, Vector> dFunc);
 
     public static class ActivationFunctions
     {
@@ -112,14 +105,14 @@ namespace Lomont.NeuralNet.Model
         // turn a function on a single variable to one operating on vectors
         public static Func<Vector, Vector> Vectorize(Func<float, float> func)
         {
-            Func<Vector, Vector> vFunc = v =>
+            Vector VFunc(Vector v)
             {
                 var v2 = new Vector(v.Size);
-                for (var i = 0; i < v.Size; ++i)
-                    v2[i] = func(v[i]);
+                for (var i = 0; i < v.Size; ++i) v2[i] = func(v[i]);
                 return v2;
-            };
-            return vFunc;
+            }
+
+            return VFunc;
         }
         #endregion
 

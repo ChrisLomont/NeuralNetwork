@@ -5,7 +5,7 @@ namespace Lomont.NeuralNet.Model
 {
     public class Vector
     {
-        public int Size;
+        public int Size { get; private set; }
         float[] data;
 
         public Vector(int size)

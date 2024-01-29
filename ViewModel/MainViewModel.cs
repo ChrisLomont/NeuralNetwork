@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Windows.Xps;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lomont.NeuralNet.Model;
@@ -31,6 +32,102 @@ namespace Lomont.NeuralNet.ViewModel
             ClearGuess();
         }
 
+        [RelayCommand]
+        void Attack()
+        {
+
+            Log("Starting attack");
+            var w = GuessedImage.PixelWidth;
+            var h = GuessedImage.PixelHeight;
+            var pixels = new byte[w * h * 3];
+            var stride = w * 3;
+            if (SelectedOutput != null)
+                SelectedOutput.bmp.CopyPixels(pixels, stride, 0);
+            else
+                guessedImage.CopyPixels(pixels, stride, 0);
+            
+
+            int originalGuess = MakeGuess(neuralNet, pixels, w, h);
+
+            bool done = false;
+            var rnd = new Random(1234); // reproducible for demonstration
+            List<int> pixelsChanged = new();
+
+            while (!done)
+            {
+
+                var index = rnd.Next(w * h) * 3;
+                if (pixels[index] != 255)
+                    continue; // already set
+                pixels[index] = pixels[index + 1] = pixels[index + 2] = 0;
+                pixelsChanged.Add(index);
+                // check
+                int newGuess = MakeGuess(neuralNet, pixels, w, h);
+                if (newGuess != originalGuess)
+                {
+                    // make red pixels
+                    foreach (var ind in pixelsChanged)
+                    {
+                        pixels[ind] = 255;
+                    }
+
+                    var img = new WriteableBitmap(w, h, 96.0, 96.0, PixelFormats.Rgb24, null);
+                    img.WritePixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
+                    GuessedImage = img;
+                    GuessedText = newGuess.ToString();
+                    done = true;
+                }
+                else
+                {
+                    // restore
+                    //  foreach (var ind in pixelsChanged)
+                    //    pixels[ind] = pixels[ind + 1] = pixels[ind + 2] = 255;
+                }
+
+
+/*
+                for (var j = 0; j < h && !done; ++j)
+                for (var i = 0; i < w && !done; ++i)
+                {
+                    
+                    if (pixels[i] != 255)
+                        continue;
+                    var (r, g, b) = GetPixel(i, j);
+                    SetPixel(i, j, 255, 0, 0);
+                    int newGuess = MakeGuess(neuralNet, pixels, w, h);
+                    if (newGuess != originalGuess)
+                    {
+                        var img = new WriteableBitmap(w, h, 96.0, 96.0, PixelFormats.Rgb24, null);
+                        img.WritePixels(new Int32Rect(0, 0, w, h), pixels, stride, 0);
+                        GuessedImage = img;
+                        GuessedText = newGuess.ToString();
+                        done = true;
+                    }
+                    else
+                    {
+                        //SetPixel(i,j,r,g,b);
+                    }
+                } */
+
+            }
+
+            Log("Attack done");
+
+            void SetPixel(int i, int j, int r, int g, int b)
+            {
+                var ind = (i + j * w) * 3;
+                pixels[ind]   = (byte)r;
+                pixels[ind+1] = (byte)g;
+                pixels[ind+2] = (byte)b;
+            }
+
+            (int, int, int) GetPixel(int i, int j)
+            {
+                var ind = (i+j*w)*3;
+                return (pixels[ind], pixels[ind+1], pixels[ind+2]);
+            }
+        }
+
         [ObservableProperty]
         Experiment selectedExperiment;
         [ObservableProperty]
@@ -52,11 +149,11 @@ namespace Lomont.NeuralNet.ViewModel
 
         void Draw(Point last, Point point)
         {
-            if (GuessedImage == null)
+            if (guessedImage == null)
                 ClearGuess();
             var w = GuessedImage.PixelWidth;
             var h = GuessedImage.PixelHeight;
-            byte[] pixels = new byte[w * h * 3];
+            var pixels = new byte[w * h * 3];
             var stride = w * 3;
             guessedImage.CopyPixels(pixels, stride, 0);
 
@@ -101,23 +198,30 @@ namespace Lomont.NeuralNet.ViewModel
             }
         }
 
+        // pixels = w*h*3 bytes RGB
+        static int MakeGuess(SimpleNeuralNet nn, byte[] pixels, int w, int h)
+        {
+            var input = new Vector(w * h);
+
+            for (var i = 0; i < w * h; ++i)
+            {
+                // grayscale, invert, 0-1
+                var c = 255 - pixels[i * 3];
+                input[i] = c / 255.0f;
+            }
+
+            var output = nn.FeedForward(input);
+            return Trainer.MaxIndex(output);
+        }
+
         int MakeGuess()
         { // from image
             if (neuralNet != null && GuessedImage != null)
             {
-                Vector input = new Vector(28 * 28);
+                var input = new Vector(28 * 28);
                 var pixels = new byte[28 * 28 * 3];
                 GuessedImage.CopyPixels(new Int32Rect(0, 0, 28, 28), pixels, 28 * 3, 0);
-
-                for (var i = 0; i < 28 * 28; ++i)
-                {
-                    // grayscale, invert, 0-1
-                    var c = 255 - pixels[i * 3];
-                    input[i] = c / 255.0f;
-                }
-
-                var output = neuralNet.FeedForward(input);
-                return Trainer.MaxIndex(output);
+                return MakeGuess(neuralNet, pixels, 28, 28);
             }
             return -1;
         }
@@ -188,7 +292,19 @@ namespace Lomont.NeuralNet.ViewModel
             SuccessRatio = $"{successes}/{dataSet.TestSet.Count}";
         }
 
-        public ObservableCollection<Result> Results { get; } = new ObservableCollection<Result>();
+        public ObservableCollection<Result> Results { get; } = new();
+        [ObservableProperty]
+        
+        
+        Result selectedOutput = null;
+        partial void OnSelectedOutputChanged(Result? oldValue, Result newValue)
+        {
+            if (newValue != null)
+            {
+                GuessedImage = newValue.bmp;
+                GuessedText = MakeGuess().ToString();
+            }
+        }
 
         public class Result
         {
@@ -218,7 +334,7 @@ namespace Lomont.NeuralNet.ViewModel
             public Func<int, Vector, Vector, Vector, Result> HowToVisualize { get; set; }
         };
 
-        public ObservableCollection<Experiment> Experiments { get; set; } = new ObservableCollection<Experiment>
+        public ObservableCollection<Experiment> Experiments { get; set; } = new()
         {
 #if true
             /* Testing set to debug network
@@ -233,6 +349,7 @@ namespace Lomont.NeuralNet.ViewModel
                     var success = desired == computed;
             return new Result
             {
+                
             Text = $"{ti}: truth = {desired}, net obtained {computed}, {outputPt} ~ {computedPt}",
             Background = success ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink),
                 success = success
@@ -282,7 +399,7 @@ namespace Lomont.NeuralNet.ViewModel
                     var success = desired == computed;
                     return new Result
                     {
-                        Text = $"{ti}: truth = {desired}, net obtained {computed}",
+                        Text = $"{ti}: truth = {desired}, net obtained {computed}, {outputPt} ~ {computedPt}",
                         Background = success ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightPink),
                         bmp = wb,
                         success = success
@@ -318,8 +435,7 @@ namespace Lomont.NeuralNet.ViewModel
             };
             var p1 = dataSet.TrainingSet[0];
 
-            var layers = new List<int>();
-            layers.Add(p1.input.Size);
+            var layers = new List<int> { p1.input.Size };
             AddLayers(layers, hiddenLayerSize);
             layers.Add(p1.output.Size);
 
@@ -373,8 +489,10 @@ namespace Lomont.NeuralNet.ViewModel
 
         void Test()
         {
-            var net = new SimpleNeuralNet();
-            net.Random = new Random(1234); // repeatable
+            var net = new SimpleNeuralNet
+            {
+                Random = new Random(1234) // repeatable
+            };
             // make a simple net
             net.Create(2, 2, 1);
             net.W[0][0, 0] = 1;
@@ -402,7 +520,7 @@ namespace Lomont.NeuralNet.ViewModel
             Messages.Add($"Test: 16={output}");
         }
 
-        public ObservableCollection<string> Messages { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Messages { get; } = new();
 
 
     }
