@@ -79,8 +79,8 @@ namespace Lomont.NeuralNet.Model
         }
         public float this[int index]
         {
-            get { return data[index]; }
-            set { data[index] = value; }
+            get => data[index];
+            set => data[index] = value;
         }
 
         public override String ToString()

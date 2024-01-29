@@ -7,8 +7,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Lomont.NeuralNet.Model;
 using static Lomont.NeuralNet.Model.ActivationFunctions;
 using Vector = Lomont.NeuralNet.Model.Vector;
@@ -22,52 +22,24 @@ using Vector = Lomont.NeuralNet.Model.Vector;
 
 namespace Lomont.NeuralNet.ViewModel
 {
-    class ViewModel : ViewModelBase
+    public partial class MainViewModel : ObservableObject
     {
         public Dispatcher Dispatcher;
-        public ViewModel()
+        public MainViewModel()
         {
-            StartStopCommand = new RelayCommand(StartStop);
-            ShowDataCommand = new RelayCommand(ShowData);
-            ClearGuessCommand = new RelayCommand(ClearGuess);
             SelectedExperiment = Experiments[1];
             ClearGuess();
         }
-        public RelayCommand StartStopCommand { get; }
-        public RelayCommand ShowDataCommand { get; }
-        public RelayCommand ClearGuessCommand { get; }
 
-        private Experiment selectedExperiment = null;
-        public Experiment SelectedExperiment
-        {
-            get => selectedExperiment;
-            set
-            {
-                Set<Experiment>(() => this.SelectedExperiment, ref selectedExperiment, value);
-            }
-        }
-
-        private string guessedText = "?";
-        public string GuessedText
-        {
-            get => guessedText;
-            set
-            {
-                Set<string>(() => this.GuessedText, ref guessedText, value);
-            }
-        }
-
-        private WriteableBitmap guessedImage = null;
-        public WriteableBitmap GuessedImage
-        {
-            get => guessedImage;
-            set
-            {
-                Set<WriteableBitmap>(() => this.GuessedImage, ref guessedImage, value);
-            }
-        }
+        [ObservableProperty]
+        Experiment selectedExperiment;
+        [ObservableProperty]
+        string guessedText = "?";
+        [ObservableProperty]
+        WriteableBitmap guessedImage;
 
 
+        [RelayCommand]
         void ClearGuess()
         {
             var pixels = new byte[28 * 28 * 3];
@@ -80,10 +52,10 @@ namespace Lomont.NeuralNet.ViewModel
 
         void Draw(Point last, Point point)
         {
-            if (guessedImage == null)
+            if (GuessedImage == null)
                 ClearGuess();
-            var w = guessedImage.PixelWidth;
-            var h = guessedImage.PixelHeight;
+            var w = GuessedImage.PixelWidth;
+            var h = GuessedImage.PixelHeight;
             byte[] pixels = new byte[w * h * 3];
             var stride = w * 3;
             guessedImage.CopyPixels(pixels, stride, 0);
@@ -105,8 +77,8 @@ namespace Lomont.NeuralNet.ViewModel
 
 
         // d = 0,1,2 down, move, up
-        private bool down = false;
-        private Point last;
+        bool down;
+        Point last;
         internal void Mouse(int d, Point point)
         {
             if (d == 0)
@@ -150,87 +122,31 @@ namespace Lomont.NeuralNet.ViewModel
             return -1;
         }
 
+        [ObservableProperty]
+        string startStopText = "Start";
 
+        [ObservableProperty]
+        float learningRate = 3.0f;
 
-        private string startStopText = "Start";
-        public string StartStopText
-        {
-            get => startStopText;
-            set
-            {
-                Set<string>(() => this.StartStopText, ref startStopText, value);
-            }
-        }
+        [ObservableProperty]
+        string successRatio = "0/0";
 
-        private float learningRate = 3.0f;
-        public float LearningRate
-        {
-            get => learningRate;
-            set
-            {
-                Set<float>(() => this.LearningRate, ref learningRate, value);
-            }
-        }
-        private string successRatio = "0/0";
-        public string SuccessRatio
-        {
-            get => successRatio;
-            set
-            {
-                Set<string>(() => this.SuccessRatio, ref successRatio, value);
-            }
-        }
-        private bool showFailures = false;
-        public bool ShowFailures
-        {
-            get => showFailures;
-            set
-            {
-                if (Set<bool>(() => this.ShowFailures, ref showFailures, value))
-                    ShowData();
-            }
-        }
+        [ObservableProperty]
+        bool showFailures;
 
+        [ObservableProperty]
+        string hiddenLayerSize = "15";
 
-        private string hiddenLayerSize = "15";
-        public string HiddenLayerSize
-        {
-            get => hiddenLayerSize;
-            set
-            {
-                Set<string>(() => this.HiddenLayerSize, ref hiddenLayerSize, value);
-            }
-        }
+        [ObservableProperty]
+        int miniBatchSize = 10;
 
-        private int miniBatchSize = 10;
-        public int MiniBatchSize
-        {
-            get => miniBatchSize;
-            set
-            {
-                Set<int>(() => this.MiniBatchSize, ref miniBatchSize, value);
-            }
-        }
+        [ObservableProperty]
+        int randSeed = 12345;
 
-        private int randSeed = 12345;
-        public int RandSeed
-        {
-            get => randSeed;
-            set
-            {
-                Set<int>(() => this.RandSeed, ref randSeed, value);
-            }
-        }
+        [ObservableProperty]
+        int epochs = 30;
 
-        private int epochs = 30;
-        public int Epochs
-        {
-            get => epochs;
-            set
-            {
-                Set<int>(() => this.Epochs, ref epochs, value);
-            }
-        }
+        [RelayCommand]
         void StartStop()
         {
             try
@@ -255,6 +171,7 @@ namespace Lomont.NeuralNet.ViewModel
 
         }
 
+        [RelayCommand]
         void ShowData()
         {
             Results.Clear();
@@ -303,6 +220,7 @@ namespace Lomont.NeuralNet.ViewModel
 
         public ObservableCollection<Experiment> Experiments { get; set; } = new ObservableCollection<Experiment>
         {
+#if true
             /* Testing set to debug network
              *
              *
@@ -320,7 +238,7 @@ namespace Lomont.NeuralNet.ViewModel
                 success = success
             };
             }},
-
+#endif
 
         /* MNIST digit recognition 
          * try parameters from 
@@ -340,7 +258,7 @@ namespace Lomont.NeuralNet.ViewModel
          * train 30 epochs
          * Should have ~95% success on test
          */
-        new Experiment{Name = "MNIST", GetData = ()=>DataSet.LoadMNIST(@"..\..\MNIST"),
+        new Experiment{Name = "MNIST", GetData = ()=>DataSet.LoadMNIST(@"MNIST"),
                 HowToVisualize = (ti,inputPt,outputPt,computedPt) =>
                 {
                     var computed = Trainer.MaxIndex(computedPt);
@@ -383,7 +301,7 @@ namespace Lomont.NeuralNet.ViewModel
             }
         }
 
-        private Trainer trainer;
+        Trainer trainer;
 
 
         void TrainExperiment()

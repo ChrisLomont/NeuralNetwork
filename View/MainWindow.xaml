@@ -9,7 +9,7 @@
         Loaded="OnLoaded"
         >
     <Window.DataContext>
-        <viewModel:ViewModel/>
+        <viewModel:MainViewModel/>
     </Window.DataContext>
 
     <DockPanel>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Xps;
 
 namespace Lomont.NeuralNet.Model
 {
@@ -28,8 +29,8 @@ namespace Lomont.NeuralNet.Model
         }
         class ByteBuffer
         {
-            private readonly byte[] buffer;
-            private int index;
+            readonly byte[] buffer;
+            int index;
             public ByteBuffer(string filename)
             {
                 buffer = File.ReadAllBytes(filename);
@@ -89,8 +90,31 @@ namespace Lomont.NeuralNet.Model
                 data.Add(new DataPoint(input, output));
             }
         }
-        public static DataSet LoadMNIST(string path)
+
+        static (bool success, string path) FindPath(string path)
         {
+            var cur  = Directory.GetCurrentDirectory();
+            while (!cur.EndsWith(@":\"))
+            {
+                var p = Path.Combine(cur, path);
+                if (Directory.Exists(p))
+                    return (true, p);
+                cur = Backup(cur);
+            }
+
+            return (false, null);
+
+            string Backup(string dir)
+            {
+                return Path.GetFullPath(Path.Combine(dir, @"..\"));
+            }
+        }
+
+        public static DataSet LoadMNIST(string inPath)
+        {
+            var (success, path) = FindPath(inPath);
+            if (!success) return null;
+
             var ds = new DataSet();
             ds.Load(
                 new ByteBuffer(Path.Combine(path, "train-images.idx3-ubyte")), 0x803, 2, 28 * 28,

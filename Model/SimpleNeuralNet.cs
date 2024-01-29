@@ -6,7 +6,7 @@ namespace Lomont.NeuralNet.Model
 {
     /// <summary>
     /// Usage:
-    /// 1. Make NN, optinally set functions
+    /// 1. Make NN, optimally set functions
     /// 2. Zero deltas
     /// 3. For each datum, feed forward, then back propagate to deltas
     /// 4. Apply deltas, updates weights
@@ -170,7 +170,7 @@ namespace Lomont.NeuralNet.Model
                 endLayerInclusive = NumLayers - 1;
             if (endLayerInclusive < startLayerInclusive)
                 endLayerInclusive = startLayerInclusive;
-            var funcPair = ActivationFunctions.Get(type);
+            var funcPair = Get(type);
             for (var n = startLayerInclusive; n <= endLayerInclusive; ++n)
             {
                 f[n] = funcPair.func;

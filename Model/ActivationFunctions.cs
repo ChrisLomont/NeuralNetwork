@@ -7,8 +7,8 @@ namespace Lomont.NeuralNet.Model
         public ActivationPair(Func<Vector, Vector> func, Func<Vector, Vector> dFunc) : base(func, dFunc)
         {
         }
-        public Func<Vector, Vector> func => this.Item1;
-        public Func<Vector, Vector> dFunc => this.Item2;
+        public Func<Vector, Vector> func => Item1;
+        public Func<Vector, Vector> dFunc => Item2;
     }
 
     public static class ActivationFunctions

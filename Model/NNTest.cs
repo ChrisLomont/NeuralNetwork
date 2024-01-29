@@ -3,7 +3,7 @@
 namespace Lomont.NeuralNet.Model
 {
     // Test the NN
-    static class NNTest
+    internal static class NNTest
     {
         // test sizes to make test algorithms stay in index bounds
         public static void TestSizes()

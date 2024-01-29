@@ -9,14 +9,14 @@ namespace Lomont.NeuralNet.Model
     {
         SimpleNeuralNet neuralNet;
         DataSet dataSet;
-        int miniBatchSize = 0;
+        int miniBatchSize;
         float learningRate;
         Action<Result> resultAction;
         Random rand;
 
         List<int> shuffled;
 
-        private int lockedInterlocked;
+        int lockedInterlocked;
         public void Stop()
         {
             Interlocked.Increment(ref lockedInterlocked);
@@ -54,9 +54,7 @@ namespace Lomont.NeuralNet.Model
             for (var i = 0; i < len; ++i)
             {
                 var j = i + rand.Next(len - i);
-                var temp = items[i];
-                items[i] = items[j];
-                items[j] = temp;
+                (items[i], items[j]) = (items[j], items[i]);
             }
         }
         public void Train(
@@ -80,13 +78,13 @@ namespace Lomont.NeuralNet.Model
             this.neuralNet = neuralNet;
             this.dataSet = dataSet;
             this.rand = rand;
-            this.state.maxEpochs = epochs;
-            this.state.trainingSize = dataSet.TrainingSet.Count;
-            this.state.testSize = dataSet.TestSet.Count;
+            state.maxEpochs = epochs;
+            state.trainingSize = dataSet.TrainingSet.Count;
+            state.testSize = dataSet.TestSet.Count;
             this.miniBatchSize = miniBatchSize;
             this.learningRate = learningRate;
             this.resultAction = resultAction;
-            this.state.message = "";
+            state.message = "";
 
             state.curEpoch = state.trainingProcessed = state.testProcessed = 0;
 

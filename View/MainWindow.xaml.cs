@@ -13,9 +13,10 @@ namespace Lomont.NeuralNet.View
             InitializeComponent();
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        void OnLoaded(object sender, RoutedEventArgs e)
         {
-            (DataContext as ViewModel.ViewModel).Dispatcher = Dispatcher;
+            if (DataContext is ViewModel.MainViewModel vm)
+                vm.Dispatcher = Dispatcher;
         }
 
         Point ToPoint(Point pt)
@@ -26,21 +27,24 @@ namespace Lomont.NeuralNet.View
                 );
         }
 
-        private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
+        void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
 
-            (DataContext as ViewModel.ViewModel).Mouse(0, ToPoint(e.GetPosition(drawGrid)));
+            if (DataContext is ViewModel.MainViewModel vm)
+                vm.Mouse(0, ToPoint(e.GetPosition(drawGrid)));
 
         }
 
-        private void UIElement_OnMouseMove(object sender, MouseEventArgs e)
+        void UIElement_OnMouseMove(object sender, MouseEventArgs e)
         {
-            (DataContext as ViewModel.ViewModel).Mouse(1, ToPoint(e.GetPosition(drawGrid)));
+            if (DataContext is ViewModel.MainViewModel vm) 
+                vm.Mouse(1, ToPoint(e.GetPosition(drawGrid)));
         }
 
-        private void UIElement_OnMouseUp(object sender, MouseButtonEventArgs e)
+        void UIElement_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            (DataContext as ViewModel.ViewModel).Mouse(2, ToPoint(e.GetPosition(drawGrid)));
+            if (DataContext is ViewModel.MainViewModel vm)
+                vm.Mouse(2, ToPoint(e.GetPosition(drawGrid)));
         }
     }
 }

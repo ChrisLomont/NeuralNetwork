@@ -10,16 +10,17 @@ namespace Lomont.NeuralNet.Model
         {
 
             if (rand == null)
-                rand = new Random();
+                this.rand = new Random();
             else
                 this.rand = rand;
         }
 
-        private Random rand;
+        readonly Random rand;
 
-        private double z1;
-        private double sigma = 1.0, mu = 0.0;
-        private bool generate = false; // set to generate first pass
+        double z1;
+        readonly double sigma = 1.0;
+        readonly double mu = 0.0;
+        bool generate; // set to generate first pass
 
         public float Next()
         {
